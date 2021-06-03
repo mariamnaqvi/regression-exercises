@@ -54,4 +54,3 @@ def wrangle_telco(df):
     # print the .info so we can verify that all changes we wanted have been made
     print(df.info())
     return df
-
