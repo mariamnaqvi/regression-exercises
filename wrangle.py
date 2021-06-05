@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler, QuantileTransformer
 # use get_db_url function to connect to the codeup db
 from env import get_db_url
 
@@ -54,3 +55,41 @@ def wrangle_telco(df):
     # print the .info so we can verify that all changes we wanted have been made
     print(df.info())
     return df
+
+def Min_Max_scaler_telco(X_train, X_validate, X_test):
+    '''
+    Takes in 3 pandas dataframes of X_train, X_validate and X_test. Then returns the 
+    scaler object as well as the transformed dfs
+    
+    This function assumes the independent variables being fed in as arguments
+    are all continuous features
+    '''
+    scaler = MinMaxScaler().fit(X_train)
+    X_train_scaled = pd.DataFrame(scaler.transform(X_train), index=X_train.index,
+                                 columns=X_train.columns)
+    X_validate_scaled = pd.DataFrame(scaler.transform(X_validate), index=X_validate.index,
+                                 columns=X_validate.columns)
+    X_test_scaled = pd.DataFrame(scaler.transform(X_test), index=X_test.index,
+                                 columns=X_test.columns)
+    
+    return scaler, X_train_scaled, X_validate_scaled, X_test_scaled
+    
+def visualize_scaled_data(scaler, scaler_name, feature):
+    scaled = scaler.fit_transform(train[[feature]])
+    fig = plt.figure(figsize = (12,6))
+
+    gs = plt.GridSpec(2,2)
+
+    ax1 = fig.add_subplot(gs[0, :])
+    ax2 = fig.add_subplot(gs[1,0])
+    ax3 = fig.add_subplot(gs[1,1])
+
+    ax1.scatter(train[[feature]], scaled)
+    ax1.set(xlabel = feature, ylabel = 'Scaled_' + feature, title = scaler_name)
+
+    ax2.hist(train[[feature]])
+    ax2.set(title = 'Original')
+
+    ax3.hist(scaled)
+    ax3.set(title = 'Scaled')
+    plt.tight_layout();
