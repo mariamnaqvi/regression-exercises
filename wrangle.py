@@ -4,6 +4,12 @@ import os
 from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler, QuantileTransformer
 # use get_db_url function to connect to the codeup db
 from env import get_db_url
+# import to use in the split function
+from sklearn.model_selection import train_test_split
+# imports for feature engineering
+from sklearn.feature_selection import SelectKBest, f_regression
+from sklearn.linear_model import LinearRegression
+from sklearn.feature_selection import RFE
 
 def get_telco_data(cached=False):
     '''
@@ -28,7 +34,7 @@ def get_telco_data(cached=False):
     # return our dataframe regardless of its origin
     return telco_df
 
-def wrangle_telco(df):
+def wrangle_data(df):
     '''
     This function takes in a pandas dataframe and checks it for duplicates. It also converts the empty string values in 
     total charges to nan values and replaces them with monthly charges values. It then prints the .info() to verify that
@@ -56,7 +62,7 @@ def wrangle_telco(df):
     print(df.info())
     return df
 
-def Min_Max_scaler_telco(X_train, X_validate, X_test):
+def Min_Max_scaler(X_train, X_validate, X_test):
     '''
     Takes in 3 pandas dataframes of X_train, X_validate and X_test. Then returns the 
     scaler object as well as the transformed dfs
@@ -92,4 +98,38 @@ def visualize_scaled_data(scaler, scaler_name, feature):
 
     ax3.hist(scaled)
     ax3.set(title = 'Scaled')
-    plt.tight_layout();
+    plt.tight_layout()
+
+
+def split_data(df):
+    '''
+    This function takes in a pandas dataframe, splits it into train, test and split dataframes and returns the three split datasets.
+    '''
+    train, test = train_test_split(df, train_size=0.8, random_state=123)
+    train, validate = train_test_split(train, train_size=0.7, random_state=123)
+    return train, validate, test
+
+
+def select_kbest(X, y, k):
+    '''
+    This function takes in the predictors (X), the target variable (y) and the number of features to select (k) and
+    returns the names of the top k selected features based on the SelectKBest class.
+    '''
+    f_selector = SelectKBest(f_regression, k)
+    f_selector.fit(X_train_scaled, y_train)
+    mask = f_selector.get_support()    
+    f_feature = X_train_scaled.columns[mask]
+    return f_feature
+
+
+def rfe(X, y, n):
+    '''
+    This function takes in the predictors (X), the target variable (y) and the number of features to select (n) and
+    returns the names of the top k selected features based on the Recursive Feature Engineering class.
+    '''
+    lm = LinearRegression()
+    rfe = RFE(lm, n)
+    rfe.fit(X_train_scaled, y_train)
+    feat_selected = X_train_scaled.columns[rfe.support_]
+    return feat_selected
+
