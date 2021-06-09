@@ -116,9 +116,9 @@ def select_kbest(X, y, k):
     returns the names of the top k selected features based on the SelectKBest class.
     '''
     f_selector = SelectKBest(f_regression, k)
-    f_selector.fit(X_train_scaled, y_train)
+    f_selector.fit(X, y)
     mask = f_selector.get_support()    
-    f_feature = X_train_scaled.columns[mask]
+    f_feature = X.columns[mask]
     return f_feature
 
 
@@ -129,7 +129,7 @@ def rfe(X, y, n):
     '''
     lm = LinearRegression()
     rfe = RFE(lm, n)
-    rfe.fit(X_train_scaled, y_train)
-    feat_selected = X_train_scaled.columns[rfe.support_]
+    rfe.fit(X, y)
+    feat_selected = X.columns[rfe.support_]
     return feat_selected
 
